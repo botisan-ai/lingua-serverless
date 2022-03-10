@@ -1,0 +1,18 @@
+# TODO: make these permissions more granular, this is too broad
+Resources:
+  lambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Role for running proper actions in lambda functions.
+      RoleName: ${self:custom.prefix}-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'

@@ -1,0 +1,16 @@
+{
+  "name": "lingua-serverless",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Simon Liang",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^3.7.3",
+    "serverless-domain-manager": "^6.0.2",
+    "serverless-rust": "^0.3.8"
+  },
+  "volta": {
+    "node": "16.14.0",
+    "yarn": "1.22.17"
+  }
+}

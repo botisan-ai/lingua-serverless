@@ -1,0 +1,11 @@
+detect_language:
+  runtime: rust
+  memorySize: 1536
+  handler: lingua-serverless
+  events:
+    - http:
+        path: /detect_language
+        method: post
+        cors: true
+  # environment:
+  #   RUST_BACKTRACE: '1'

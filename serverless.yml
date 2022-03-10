@@ -1,0 +1,41 @@
+service: lingua-serverless
+
+provider:
+  name: aws
+  stage: ${opt:stage, "prod"}
+  region: ${opt:region, env:AWS_REGION, "us-west-2"}
+  profile: ${env:AWS_PROFILE, "x-tech"}
+  timeout: 30
+  iam:
+    role: lambdaRole
+
+useDotenv: true
+
+package:
+  individually: true
+
+functions:
+  - ${file(./resources/functions.yml)}
+
+resources:
+  - ${file(./resources/iam.yml)}
+
+custom:
+  prefix: ${self:service}-${self:provider.stage}
+
+  rust:
+    # flags passed to cargo
+    # cargoFlags: '--features enable-awesome'
+    # custom docker tag
+    # dockerTag: 0.4.0-rust-1.58.1
+    # #  custom docker image
+    # dockerImage: rustserverless/lambda-rust
+    dockerless: true
+
+  customDomains:
+    domainName: ${env:DOMAIN_NAME}
+    certificateArn: ${env:ACM_ARN}
+
+plugins:
+  - serverless-domain-manager
+  - serverless-rust
