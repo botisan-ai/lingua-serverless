@@ -17,15 +17,23 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
     let body: Value = serde_json::from_str(body_json).unwrap();
     let text = body["text"].as_str().unwrap();
 
-    // FIXME: make languages optional so it will default to use all languages
-    let languages_json = body["languages"].as_array().unwrap();
+    let empty_vec: Vec<Value> = vec![];
+    let languages_json = match body["languages"].as_array() {
+        Some(languages_json) => languages_json,
+        None => &empty_vec,
+    };
 
     let languages: Vec<Language> = languages_json.iter()
         .map(|language| IsoCode639_1::from_str(language.as_str().unwrap()).unwrap())
         .map(|iso_code| Language::from_iso_code_639_1(&iso_code))
         .collect();
 
-    let detector = LanguageDetectorBuilder::from_languages(&languages).build();
+    let detector = if languages.len() > 1 {
+        LanguageDetectorBuilder::from_languages(&languages).build()
+    } else {
+        LanguageDetectorBuilder::from_all_languages().build()
+    };
+
     let confidence_values: Vec<(Language, f64)> = detector.compute_language_confidence_values(text);
 
     let return_values: Vec<Value> = confidence_values
