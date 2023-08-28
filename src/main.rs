@@ -1,7 +1,7 @@
-use std::str::FromStr;
 use lambda_runtime::{service_fn, Error, LambdaEvent};
-use lingua::{Language, LanguageDetectorBuilder, IsoCode639_1};
+use lingua::{IsoCode639_1, Language, LanguageDetectorBuilder};
 use serde_json::{json, Value};
+use std::str::FromStr;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -23,7 +23,8 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
         None => &empty_vec,
     };
 
-    let languages: Vec<Language> = languages_json.iter()
+    let languages: Vec<Language> = languages_json
+        .iter()
         .map(|language| IsoCode639_1::from_str(language.as_str().unwrap()).unwrap())
         .map(|iso_code| Language::from_iso_code_639_1(&iso_code))
         .collect();
@@ -31,7 +32,9 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
     let detector = if languages.len() > 1 {
         LanguageDetectorBuilder::from_languages(&languages).build()
     } else {
-        LanguageDetectorBuilder::from_all_languages().build()
+        LanguageDetectorBuilder::from_all_languages()
+            .with_minimum_relative_distance(0.1)
+            .build()
     };
 
     let confidence_values: Vec<(Language, f64)> = detector.compute_language_confidence_values(text);
@@ -41,6 +44,7 @@ async fn func(event: LambdaEvent<Value>) -> Result<Value, Error> {
         .map(|(language, confidence)| {
             json!({
                 "language": language.iso_code_639_1().to_string(),
+                "language_name": language.to_string(),
                 "confidence": confidence
             })
         })
